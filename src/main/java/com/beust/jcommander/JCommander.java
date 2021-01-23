@@ -714,13 +714,12 @@ public class JCommander {
                             increment = processRegularOptionArity(args, validate, i, increment, pd);
                         }
                     }
-                } else {
-                    if (options.acceptUnknownOptions) {
-                        i = getNewIndexArity(args, i, arg);
-                        increment = 0;
-                    } else {
+                  } else {
+                    if (!options.acceptUnknownOptions)
                         throw new ParameterException("Unknown option: " + arg);
-                    }
+
+                    i = getNewIndexArity(args, i, arg);
+                    increment = 0;
                 }
             } else {
                 //
