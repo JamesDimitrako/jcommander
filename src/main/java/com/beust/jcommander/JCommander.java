@@ -716,11 +716,7 @@ public class JCommander {
                     }
                 } else {
                     if (options.acceptUnknownOptions) {
-                        unknownArgs.add(arg);
-                        i++;
-                        while (i < args.length && !isOption(args[i])) {
-                            unknownArgs.add(args[i++]);
-                        }
+                        i = getNewIndexArity(args, i, arg);
                         increment = 0;
                     } else {
                         throw new ParameterException("Unknown option: " + arg);
@@ -793,6 +789,15 @@ public class JCommander {
             }
         }
 
+    }
+
+    private int getNewIndexArity(String[] args, int i, String arg) {
+        unknownArgs.add(arg);
+        i++;
+        while (i < args.length && !isOption(args[i])) {
+            unknownArgs.add(args[i++]);
+        }
+        return i;
     }
 
     private int processRegularOptionArity(String[] args, boolean validate, int i, int increment, ParameterDescription pd) {
