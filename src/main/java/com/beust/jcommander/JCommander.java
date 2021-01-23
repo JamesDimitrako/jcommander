@@ -711,22 +711,7 @@ public class JCommander {
                             //
                             increment = processVariableArity(args, i, pd, validate);
                         } else {
-                            //
-                            // Regular option
-                            //
-                            Class<?> fieldType = pd.getParameterized().getType();
-
-                            // Boolean, set to true as soon as we see it, unless it specified
-                            // an arity of 1, in which case we need to read the next value
-                            if (pd.getParameter().arity() == -1 && isBooleanType(fieldType)) {
-                                handleBooleanOption(pd, fieldType);
-                            } else {
-                                increment = processFixedArity(args, i, pd, validate, fieldType);
-                            }
-                            // If it's a help option, remember for later
-                            if (pd.isHelp()) {
-                                helpWasSpecified = true;
-                            }
+                            increment = processRegularOptionArity(args, validate, i, increment, pd);
                         }
                     }
                 } else {
@@ -808,6 +793,26 @@ public class JCommander {
             }
         }
 
+    }
+
+    private int processRegularOptionArity(String[] args, boolean validate, int i, int increment, ParameterDescription pd) {
+        //
+        // Regular option
+        //
+        Class<?> fieldType = pd.getParameterized().getType();
+
+        // Boolean, set to true as soon as we see it, unless it specified
+        // an arity of 1, in which case we need to read the next value
+        if (pd.getParameter().arity() == -1 && isBooleanType(fieldType)) {
+            handleBooleanOption(pd, fieldType);
+        } else {
+            increment = processFixedArity(args, i, pd, validate, fieldType);
+        }
+        // If it's a help option, remember for later
+        if (pd.isHelp()) {
+            helpWasSpecified = true;
+        }
+        return increment;
     }
 
     private boolean isBooleanType(Class<?> fieldType) {
