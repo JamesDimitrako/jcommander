@@ -7,7 +7,7 @@ import com.beust.jcommander.Parameterized;
 
 import java.util.List;
 
-public abstract class ConvertMiddleware {
+public abstract class ConvertMiddleware implements ΙConvertMiddleware {
     private ConvertMiddleware next;
 
     /**
