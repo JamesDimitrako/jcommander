@@ -8,7 +8,8 @@ import com.beust.jcommander.Parameterized;
 import java.util.List;
 
 public interface ΙConvertMiddleware {
-    public ConvertMiddleware linkWith(ConvertMiddleware next);
-    public abstract IStringConverter process(final Parameterized parameterized, Class type, String optionName, String value, final Parameter annotation, List<IStringConverterInstanceFactory> options);
+     ConvertMiddleware linkWith(ConvertMiddleware next);
 
-    }
+     IStringConverter process(final Parameterized parameterized, Class type, String optionName, String value,
+                              final Parameter annotation, List<IStringConverterInstanceFactory> options);
+}

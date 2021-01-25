@@ -10,7 +10,12 @@ import java.util.List;
 
 public class ConvertEnum extends ConvertMiddleware{
     @Override
-    public IStringConverter process(Parameterized parameterized, Class type, String optionName, String value, Parameter annotation, List<IStringConverterInstanceFactory> options) {
-        return new EnumConverter(optionName, type) != null ? new EnumConverter(optionName, type) :  processNext(parameterized, type, optionName, value, annotation, options);
+    public IStringConverter process(Parameterized parameterized, Class type, String optionName, String value,
+                                    Parameter annotation, List<IStringConverterInstanceFactory> options) {
+        IStringConverter<?> converter = null;
+        converter = new EnumConverter(optionName, type);
+
+        return converter != null ? converter :  processNext(parameterized, type,
+                optionName, value, annotation, options);
     }
 }

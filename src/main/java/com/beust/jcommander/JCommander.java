@@ -1329,7 +1329,8 @@ public class JCommander {
         ConverterClient converterClient = new ConverterClient();
         converterClient.setMiddleware(convertList);
 
-        IStringConverter<?> converter = converterClient.convert(parameterized,type,optionName,value,annotation,options.converterInstanceFactories);
+        IStringConverter<?> converter = converterClient.convert(parameterized,type,optionName
+        ,value,annotation,options.converterInstanceFactories);
 
         return converter.convert(value);
     }

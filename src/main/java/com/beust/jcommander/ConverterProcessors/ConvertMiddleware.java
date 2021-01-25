@@ -21,13 +21,15 @@ public abstract class ConvertMiddleware implements ΙConvertMiddleware {
     /**
      * Subclasses will implement this method with concrete checks.
      */
-    public abstract IStringConverter process(final Parameterized parameterized, Class type, String optionName, String value, final Parameter annotation, List<IStringConverterInstanceFactory> options);
+    public abstract IStringConverter process(final Parameterized parameterized, Class type, String optionName, String value,
+                                             final Parameter annotation, List<IStringConverterInstanceFactory> options);
 
     /**
      * Runs check on the next object in chain or ends traversing if we're in
      * last object in chain.
      */
-    protected IStringConverter processNext(final Parameterized parameterized, Class type, String optionName, String value, final Parameter annotation,List<IStringConverterInstanceFactory> options) {
+    protected IStringConverter processNext(final Parameterized parameterized, Class type, String optionName, String value,
+                                           final Parameter annotation,List<IStringConverterInstanceFactory> options) {
         ConvertMiddleware lastMiddleware = this;
         if (next == null)
             return null;

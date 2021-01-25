@@ -11,7 +11,12 @@ import static com.beust.jcommander.InstanceConverterHelper.findConverterInstance
 
 public class ConvertFindInstance extends ConvertMiddleware{
     @Override
-    public IStringConverter process(Parameterized parameterized, Class type, String optionName, String value, Parameter annotation, List<IStringConverterInstanceFactory> options) {
-        return findConverterInstance(annotation, type, optionName, options) != null ? findConverterInstance(annotation, type, optionName, options) :  processNext(parameterized, type, optionName, value, annotation, options);
+    public IStringConverter process(Parameterized parameterized, Class type, String optionName, String value,
+                                    Parameter annotation, List<IStringConverterInstanceFactory> options) {
+        IStringConverter<?> converter = null;
+        converter = findConverterInstance(annotation, type, optionName, options);
+
+        return converter != null ? converter
+                :  processNext(parameterized, type, optionName, value, annotation, options);
     }
 }

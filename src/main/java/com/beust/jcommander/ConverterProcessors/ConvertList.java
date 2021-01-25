@@ -13,10 +13,15 @@ import static com.beust.jcommander.InstanceConverterHelper.tryInstantiateConvert
 public class ConvertList extends ConvertMiddleware {
     // If a list converter was specified, pass the value to it for direct conversion
     @Override
-    public IStringConverter process(Parameterized parameterized, Class type, String optionName, String value, Parameter annotation,List<IStringConverterInstanceFactory> options) {
+    public IStringConverter process(Parameterized parameterized, Class type, String optionName, String value, Parameter annotation,
+                                    List<IStringConverterInstanceFactory> options) {
+        IStringConverter<?> converter = null;
 
         if (type.isAssignableFrom(List.class))
-            return tryInstantiateConverter(optionName, annotation.listConverter());
+            converter = tryInstantiateConverter(optionName, annotation.listConverter());
+
+        if (converter != null)
+            return converter;
 
         return processNext(parameterized, type, optionName, value, annotation, options);
     }
