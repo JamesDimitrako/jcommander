@@ -18,6 +18,7 @@
 
 package com.beust.jcommander;
 
+import com.beust.jcommander.ConverterProcessors.*;
 import com.beust.jcommander.FuzzyMap.IKey;
 import com.beust.jcommander.converters.*;
 import com.beust.jcommander.internal.*;
@@ -31,6 +32,9 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.beust.jcommander.InstanceConverterHelper.instantiateConverter;
+import static com.beust.jcommander.InstanceConverterHelper.tryInstantiateConverter;
 
 /**
  * The main class for JCommander. It's responsible for parsing the object that contains
@@ -1310,70 +1314,29 @@ public class JCommander {
             optionName = annotation.names().length > 0 ? annotation.names()[0] : "[Main class]";
         }
 
-        IStringConverter<?> converter = null;
-        if (type.isAssignableFrom(List.class)) {
-            // If a list converter was specified, pass the value to it for direct conversion
-            converter = tryInstantiateConverter(optionName, annotation.listConverter());
-        }
-        if (type.isAssignableFrom(List.class) && converter == null) {
-            // No list converter: use the single value converter and pass each parsed value to it individually
-            final IParameterSplitter splitter = tryInstantiateConverter(null, annotation.splitter());
-            converter = new DefaultListConverter(splitter, new IStringConverter() {
-                @Override
-                public Object convert(String value) {
-                    final Type genericType = parameterized.findFieldGenericType();
-                    return convertValue(parameterized, genericType instanceof Class ? (Class) genericType : String.class, null, value);
-                }
-            });
-        }
+        // Chain of Responsibility. Creation of Handlers-Middlewares
+        ConvertList convertList = new ConvertList();
+        ConverterNoList noListConverter = new ConverterNoList();
+        ConvertAnnotation convertAnnotation = new ConvertAnnotation();
+        ConvertFindInstance convertFindInstance = new ConvertFindInstance();
+        ConvertEnum convertEnum = new ConvertEnum();
+        ConvertString convertString = new ConvertString();
+        // Constructs the actual chain.
+        convertList.linkWith(noListConverter).linkWith(convertAnnotation).linkWith(convertFindInstance)
+                .linkWith(convertEnum).linkWith(convertString);
 
-        if (converter == null) {
-            converter = tryInstantiateConverter(optionName, annotation.converter());
-        }
-        if (converter == null) {
-            converter = findConverterInstance(annotation, type, optionName);
-        }
-        if (converter == null && type.isEnum()) {
-            converter = new EnumConverter(optionName, type);
-        }
-        if (converter == null) {
-            converter = new StringConverter();
-        }
+        // Create client that handles the process of convert
+        ConverterClient converterClient = new ConverterClient();
+        converterClient.setMiddleware(convertList);
+
+        IStringConverter<?> converter = converterClient.convert(parameterized,type,optionName,value,annotation,options.converterInstanceFactories);
+
         return converter.convert(value);
     }
 
-    private static <T> T tryInstantiateConverter(String optionName, Class<T> converterClass) {
-        if (converterClass == NoConverter.class || converterClass == null) {
-            return null;
-        }
-        try {
-            return instantiateConverter(optionName, converterClass);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException ignore) {
-            return null;
-        }
-    }
 
-    private static <T> T instantiateConverter(String optionName, Class<? extends T> converterClass)
-            throws InstantiationException, IllegalAccessException,
-            InvocationTargetException {
-        Constructor<T> ctor = null;
-        Constructor<T> stringCtor = null;
-        for (Constructor<T> c : (Constructor<T>[]) converterClass.getDeclaredConstructors()) {
-            c.setAccessible(true);
-            Class<?>[] types = c.getParameterTypes();
-            if (types.length == 1 && types[0].equals(String.class)) {
-                stringCtor = c;
-            } else if (types.length == 0) {
-                ctor = c;
-            }
-        }
 
-        return stringCtor != null
-                ? stringCtor.newInstance(optionName)
-                : ctor != null
-                ? ctor.newInstance()
-                : null;
-    }
+
 
     /**
      * Add a command object.
